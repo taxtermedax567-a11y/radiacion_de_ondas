@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diferencia entre Ondas Mecánicas y Electromagnéticas</title>
+    <!-- Tailwind CSS para el diseño visual premium -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons para una interfaz moderna -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .tab-active {
+            border-bottom: 3px solid #6366f1;
+            color: #6366f1;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e1b4b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4f46e5;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6366f1;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white">
+
+    <!-- Header / Navbar -->
+    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="p-2.5 bg-indigo-600/20 text-indigo-400 rounded-xl border border-indigo-500/30 shadow-lg shadow-indigo-500/10">
+                    <i data-lucide="activity" class="w-6 h-6 animate-pulse"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                        Laboratorio de Ondas
+                    </h1>
+                    <p class="text-xs text-slate-400">Mecánicas vs. Electromagnéticas • Ciencias Físicas</p>
+                </div>
+            </div>
+            
+            <!-- Selector de tipo de onda principal -->
+            <div class="flex bg-slate-950 p-1 rounded-xl border border-slate-800 shadow-inner">
+                <button id="btn-mecanicas" onclick="switchWaveType('mecanicas')" class="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-300 bg-indigo-600 text-white shadow-md">
+                    <i data-lucide="volume-2" class="w-4 h-4"></i>
+                    Ondas Mecánicas
+                </button>
+                <button id="btn-electromagneticas" onclick="switchWaveType('electromagneticas')" class="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-300 text-slate-400 hover:text-white">
+                    <i data-lucide="zap" class="w-4 h-4"></i>
+                    Ondas Electromagnéticas
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow max-w-7xl mx-auto w-full p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Panel Izquierdo: Visualizador y Controles (8/12) -->
+        <div class="lg:col-span-8 flex flex-col gap-6">
+            
+            <!-- Canvas Card -->
+            <div class="bg-slate-900 rounded-2xl border border-slate-800 p-4 md:p-6 shadow-xl relative overflow-hidden flex flex-col">
+                <!-- Indicador de medio/vacío o tipo de onda actual -->
+                <div class="flex justify-between items-center mb-4 z-10">
+                    <div class="flex items-center gap-2">
+                        <span id="wave-badge" class="px-3 py-1 text-xs font-semibold rounded-full bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+                            Onda Mecánica Longitudinal (Sonido)
+                        </span>
+                    </div>
+                    <div class="text-xs text-slate-400 font-mono" id="canvas-status">
+                        Medio: Aire (1 atm)
+                    </div>
+                </div>
+
+                <!-- Contenedor del Canvas para redimensionamiento fluido -->
+                <div class="w-full bg-slate-950 rounded-xl border border-slate-800/80 relative aspect-video flex items-center justify-center overflow-hidden">
+                    <canvas id="waveCanvas" class="w-full h-full block cursor-crosshair"></canvas>
+                    
+                    <!-- Capa para simular el vacío en ondas mecánicas -->
+                    <div id="vacuum-overlay" class="absolute inset-0 bg-slate-950/0 pointer-events-none transition-all duration-700 flex items-center justify-center">
+                        <div id="vacuum-text" class="text-center opacity-0 transform translate-y-4 transition-all duration-500">
+                            <div class="bg-red-500/20 border border-red-500/30 px-6 py-3 rounded-xl backdrop-blur-md max-w-xs">
+                                <i data-lucide="snowflake" class="w-8 h-8 text-red-400 mx-auto mb-2 animate-spin-slow"></i>
+                                <h4 class="font-bold text-red-300">Vacío Absoluto</h4>
+                                <p class="text-xs text-slate-300 mt-1">Sin partículas que vibren, el sonido es incapaz de propagarse.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Info overlay interactivo en tiempo real -->
+                    <div class="absolute bottom-4 left-4 bg-slate-900/90 backdrop-blur border border-slate-800 px-4 py-2 rounded-lg text-xs font-mono space-y-1 z-10">
+                        <div>Frecuencia: <span id="val-freq-display" class="text-indigo-400 font-bold">250 Hz</span></div>
+                        <div id="extra-spec-display">Longitud de onda (λ): <span class="text-emerald-400 font-bold">1.36 m</span></div>
+                    </div>
+                </div>
+
+                <!-- Leyenda de colores del canvas -->
+                <div class="mt-4 flex flex-wrap gap-4 text-xs text-slate-400 justify-center border-t border-slate-800/60 pt-4" id="canvas-legend">
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-3 h-3 rounded-full bg-cyan-400 inline-block animate-pulse"></span>
+                        <span>Partículas del medio (vibración)</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-3.5 h-1 bg-red-500 inline-block"></span>
+                        <span>Frente de Presión / Onda de sonido</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel de Controles -->
+            <div class="bg-slate-900 rounded-2xl border border-slate-800 p-6 shadow-xl flex flex-col gap-6">
+                <h3 class="font-bold text-lg text-slate-100 flex items-center gap-2">
+                    <i data-lucide="sliders" class="w-5 h-5 text-indigo-400"></i>
+                    Controles de Simulación Interactivos
+                </h3>
+
+                <!-- Controles específicos para Ondas Mecánicas -->
+                <div id="controls-mecanicas" class="space-y-6">
+                    <!-- Frecuencia slider -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="font-medium text-slate-300 flex items-center gap-1.5">
+                                <i data-lucide="music-4" class="w-4 h-4 text-indigo-400"></i>
+                                Frecuencia del Sonido (Tono)
+                            </span>
+                            <span class="font-bold text-indigo-400 font-mono" id="label-freq-mec">250 Hz</span>
+                        </div>
+                        <input type="range" id="slider-freq-mec" min="100" max="1000" step="5" value="250" oninput="updateControls()" class="w-full h-2 bg-slate-950 rounded-lg appearance-none cursor-pointer accent-indigo-500">
+                        <div class="flex justify-between text-xs text-slate-500">
+                            <span>Bajo (Grave)</span>
+                            <span>Medio</span>
+                            <span>Alto (Agudo)</span>
+                        </div>
+                    </div>
+
+                    <!-- Amplitud slider -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="font-medium text-slate-300 flex items-center gap-1.5">
+                                <i data-lucide="volume-1" class="w-4 h-4 text-indigo-400"></i>
+                                Amplitud (Volumen)
+                            </span>
+                            <span class="font-bold text-indigo-400 font-mono" id="label-amp-mec">50%</span>
+                        </div>
+                        <input type="range" id="slider-amp-mec" min="0" max="100" step="1" value="50" oninput="updateControls()" class="w-full h-2 bg-slate-950 rounded-lg appearance-none cursor-pointer accent-indigo-500">
+                    </div>
+
+                    <!-- Botones de Acción Extra -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+                        <!-- Play Audio Button -->
+                        <button id="btn-audio" onclick="toggleAudio()" class="flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-bold rounded-xl shadow-lg transition-all duration-200">
+                            <i data-lucide="play" class="w-5 h-5" id="icon-audio"></i>
+                            <span id="text-audio">Escuchar Audio</span>
+                        </button>
+                        
+                        <!-- Toggle de Vacío -->
+                        <button id="btn-vacuum" onclick="toggleVacuum()" class="flex items-center justify-center gap-2 px-4 py-3 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold rounded-xl border border-slate-700/80 transition-all duration-200">
+                            <i data-lucide="wind" class="w-5 h-5 text-emerald-400" id="icon-vacuum"></i>
+                            <span id="text-vacuum">Quitar el Aire (Vacío)</span>
+                        </button>
+
+                        <!-- Tipo de onda mecánica -->
+                        <div class="flex bg-slate-950 p-1 rounded-xl border border-slate-800">
+                            <button id="btn-long" onclick="setMechanicalMode('longitudinal')" class="flex-1 py-1.5 text-xs font-semibold rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                                Longitudinal
+                            </button>
+                            <button id="btn-trans" onclick="setMechanicalMode('transversal')" class="flex-1 py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-white">
+                                Transversal
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controles específicos para Ondas Electromagnéticas -->
+                <div id="controls-electromagneticas" class="space-y-6 hidden">
+                    <!-- Frecuencia slider (Espectro visible) -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="font-medium text-slate-300 flex items-center gap-1.5">
+                                <i data-lucide="sparkles" class="w-4 h-4 text-purple-400"></i>
+                                Frecuencia de la Onda (Espectro Visible / Color)
+                            </span>
+                            <span class="font-bold font-mono text-purple-400" id="label-freq-em">480 THz (Rojo)</span>
+                        </div>
+                        <input type="range" id="slider-freq-em" min="400" max="789" step="1" value="480" oninput="updateControls()" class="w-full h-2 bg-gradient-to-r from-red-600 via-yellow-500 via-green-500 via-cyan-500 via-blue-500 to-violet-600 rounded-lg appearance-none cursor-pointer">
+                        <div class="flex justify-between text-xs text-slate-500 font-mono">
+                            <span>400 THz (Infrarrojo)</span>
+                            <span>600 THz (Verde)</span>
+                            <span>789 THz (Ultravioleta)</span>
+                        </div>
+                    </div>
+
+                    <!-- Amplitud slider -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="font-medium text-slate-300 flex items-center gap-1.5">
+                                <i data-lucide="sun" class="w-4 h-4 text-purple-400"></i>
+                                Intensidad de la Luz (Amplitud)
+                            </span>
+                            <span class="font-bold text-purple-400 font-mono" id="label-amp-em">80%</span>
+                        </div>
+                        <input type="range" id="slider-amp-em" min="10" max="100" step="1" value="80" oninput="updateControls()" class="w-full h-2 bg-slate-950 rounded-lg appearance-none cursor-pointer accent-purple-500">
+                    </div>
+
+                    <!-- Selector de regiones rápidas del espectro completo -->
+                    <div class="space-y-2">
+                        <span class="text-xs text-slate-400 block font-semibold">Saltar a regiones del Espectro Completo:</span>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
+                            <button onclick="jumpToSpectrum('radio')" class="px-2 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg border border-slate-700/60 transition-all">Radio</button>
+                            <button onclick="jumpToSpectrum('micro')" class="px-2 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg border border-slate-700/60 transition-all">Microondas</button>
+                            <button onclick="jumpToSpectrum('infra')" class="px-2 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg border border-slate-700/60 transition-all">Infrarrojo</button>
+                            <button onclick="jumpToSpectrum('visible')" class="px-2 py-1.5 bg-indigo-600/30 hover:bg-indigo-600/40 text-indigo-200 text-xs font-semibold rounded-lg border border-indigo-500/40 transition-all">Luz Visible</button>
+                            <button onclick="jumpToSpectrum('uv')" class="px-2 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg border border-slate-700/60 transition-all">Ultravioleta</button>
+                            <button onclick="jumpToSpectrum('xray')" class="px-2 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg border border-slate-700/60 transition-all">Rayos X</button>
+                            <button onclick="jumpToSpectrum('gamma')" class="px-2 py-1.5 bg-red-950/40 hover:bg-red-900/40 text-red-300 text-xs font-semibold rounded-lg border border-red-800/40 transition-all">Rayos Gamma</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Panel Derecho: Explicación Dinámica e Información Científica (4/12) -->
+        <div class="lg:col-span-4 flex flex-col gap-6">
+            
+            <!-- Tarjeta Informativa Dinámica -->
+            <div id="info-card" class="bg-gradient-to-b from-slate-900 to-indigo-950/40 rounded-2xl border border-slate-800 p-6 shadow-xl flex-grow flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center gap-2 text-indigo-400 font-extrabold tracking-wide uppercase text-xs mb-3">
+                        <span class="w-2 h-2 rounded-full bg-indigo-500 animate-ping"></span>
+                        Guía de Experimento en Vivo
+                    </div>
+                    
+                    <h3 id="info-title" class="text-2xl font-bold text-slate-100 mb-4 flex items-center gap-2">
+                        Ondas Mecánicas
+                    </h3>
+                    
+                    <!-- Contenido Informativo Reactivo -->
+                    <div id="info-content" class="text-slate-300 text-sm leading-relaxed space-y-4">
+                        <!-- Se poblará dinámicamente con JS -->
+                    </div>
+                </div>
+
+                <!-- Tarjeta Científica Clave / Dato Interesante -->
+                <div class="mt-8 p-4 bg-slate-950/80 rounded-xl border border-slate-800/80">
+                    <div class="flex gap-3 items-start">
+                        <div class="p-2 bg-indigo-600/10 text-indigo-400 rounded-lg">
+                            <i data-lucide="lightbulb" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h5 class="text-xs font-bold text-slate-200 uppercase tracking-wider">Concepto Crucial</h5>
+                            <p id="fun-fact" class="text-xs text-slate-400 mt-1">
+                                Las ondas mecánicas transfieren energía a través de la vibración de materia, mientras que las electromagnéticas son perturbaciones de campos eléctricos y magnéticos autopropagables.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabla Comparativa Rápida -->
+            <div class="bg-slate-900 rounded-2xl border border-slate-800 p-6 shadow-xl">
+                <h4 class="font-bold text-sm text-slate-200 mb-3 flex items-center gap-2">
+                    <i data-lucide="scale" class="w-4 h-4 text-emerald-400"></i>
+                    Comparativa de Propagación
+                </h4>
+                <div class="space-y-3 text-xs font-mono">
+                    <div class="flex justify-between py-1.5 border-b border-slate-800/60">
+                        <span class="text-slate-400">¿Requiere Medio?</span>
+                        <span id="comp-medio" class="text-emerald-400 font-bold">Sí (Materia)</span>
+                    </div>
+                    <div class="flex justify-between py-1.5 border-b border-slate-800/60">
+                        <span class="text-slate-400">Velocidad típica</span>
+                        <span id="comp-speed" class="text-emerald-400 font-bold">~343 m/s (en Aire)</span>
+                    </div>
+                    <div class="flex justify-between py-1.5 border-b border-slate-800/60">
+                        <span class="text-slate-400">Tipo de onda</span>
+                        <span id="comp-type" class="text-emerald-400 font-bold">Longitudinal o Transversal</span>
+                    </div>
+                    <div class="flex justify-between py-1.5">
+                        <span class="text-slate-400">Ejemplo común</span>
+                        <span id="comp-example" class="text-emerald-400 font-bold">Sonido, Terremotos</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800/80 bg-slate-950 py-6 px-6 text-center text-xs text-slate-500">
+        <p>© 2026 Laboratorio Virtual de Física Interactiva. Creado con fines educativos.</p>
+    </footer>
+
+    <!-- Script principal de simulación -->
+    <script>
+        // --- VARIABLES DE ESTADO ---
+        let waveType = 'mecanicas'; // 'mecanicas' o 'electromagneticas'
+        let mechanicalMode = 'longitudinal'; // 'longitudinal' o 'transversal'
+        let isAudioPlaying = false;
+        let isVacuumActive = false;
+        
+        // Elementos DOM
+        const canvas = document.getElementById('waveCanvas');
+        const ctx = canvas.getContext('2d');
+        let animationFrameId;
+        
+        // Web Audio API para reproducir el audio de forma dinámica
+        let audioCtx = null;
+        let oscillator = null;
+        let gainNode = null;
+
+        // Variables de ondas electromagnéticas
+        let emSpectrumMode = 'visible'; // 'visible', 'radio', 'micro', 'infra', 'uv', 'xray', 'gamma'
+
+        // --- INICIALIZACIÓN ---
+        window.addEventListener('load', () => {
+            // Inicializar Lucide Icons
+            lucide.createIcons();
+            
+            // Ajustar tamaño del canvas
+            resizeCanvas();
+            window.addEventListener('resize', () => {
+                resizeCanvas();
+                draw();
+            });
+
+            // Establecer contenido inicial
+            updateControls();
+            
+            // Iniciar ciclo de simulación
+            animate();
+        });
+
+        function resizeCanvas() {
+            // Obtener el ancho real del contenedor para evitar distorsión
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+        }
+
+        // --- CAMBIAR ENTRE MECÁNICAS Y ELECTROMAGNÉTICAS ---
+        function switchWaveType(type) {
+            waveType = type;
+            
+            // Actualizar botones de navegación
+            const btnMec = document.getElementById('btn-mecanicas');
+            const btnEM = document.getElementById('btn-electromagneticas');
+            
+            if (waveType === 'mecanicas') {
+                btnMec.className = "flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-300 bg-indigo-600 text-white shadow-md";
+                btnEM.className = "flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-300 text-slate-400 hover:text-white";
+                
+                document.getElementById('controls-mecanicas').classList.remove('hidden');
+                document.getElementById('controls-electromagneticas').classList.add('hidden');
+                document.getElementById('vacuum-overlay').classList.add('pointer-events-none');
+                
+                if (isVacuumActive) {
+                    document.getElementById('vacuum-overlay').style.opacity = '1';
+                } else {
+                    document.getElementById('vacuum-overlay').style.opacity = '0';
+                }
+            } else {
+                btnEM.className = "flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-300 bg-purple-600 text-white shadow-md";
+                btnMec.className = "flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-300 text-slate-400 hover:text-white";
+                
+                document.getElementById('controls-electromagneticas').classList.remove('hidden');
+                document.getElementById('controls-mecanicas').classList.add('hidden');
+                
+                // Forzar ocultamiento de capa de vacío
+                document.getElementById('vacuum-overlay').style.opacity = '0';
+                
+                // Detener audio mecánico temporalmente si está activo
+                if (isAudioPlaying) {
+                    stopAudio();
+                }
+            }
+            
+            updateControls();
+        }
+
+        // Tipo de onda mecánica (longitudinal / transversal)
+        function setMechanicalMode(mode) {
+            mechanicalMode = mode;
+            const btnLong = document.getElementById('btn-long');
+            const btnTrans = document.getElementById('btn-trans');
+            
+            if (mode === 'longitudinal') {
+                btnLong.className = "flex-1 py-1.5 text-xs font-semibold rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-500/30";
+                btnTrans.className = "flex-1 py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-white";
+                document.getElementById('wave-badge').innerText = "Onda Mecánica Longitudinal (Sonido)";
+            } else {
+                btnTrans.className = "flex-1 py-1.5 text-xs font-semibold rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-500/30";
+                btnLong.className = "flex-1 py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-white";
+                document.getElementById('wave-badge').innerText = "Onda Mecánica Transversal (Cuerda/Sismo)";
+            }
+            updateControls();
+        }
+
+        // --- ACTUALIZAR CONTROLES E INFO ---
+        function updateControls() {
+            if (waveType === 'mecanicas') {
+                const freq = parseInt(document.getElementById('slider-freq-mec').value);
+                const amp = parseInt(document.getElementById('slider-amp-mec').value);
+                
+                document.getElementById('label-freq-mec').innerText = `${freq} Hz`;
+                document.getElementById('label-amp-mec').innerText = `${amp}%`;
+                
+                document.getElementById('val-freq-display').innerText = `${freq} Hz`;
+                document.getElementById('val-freq-display').className = "text-indigo-400 font-bold";
+                
+                // Calcular longitud de onda (v = f * lambda) -> lambda = v / f
+                // Velocidad del sonido en aire aproximada = 343 m/s
+                const lambda = (343 / freq).toFixed(2);
+                document.getElementById('extra-spec-display').innerHTML = `Longitud de onda (λ): <span class="text-emerald-400 font-bold">${lambda} m</span>`;
+                
+                // Actualizar audio en vivo si está sonando
+                if (isAudioPlaying && oscillator && gainNode) {
+                    oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                    gainNode.gain.setValueAtTime((amp / 100) * 0.1, audioCtx.currentTime); // Límite de volumen del 10%
+                }
+
+                // Actualizar leyenda del canvas
+                document.getElementById('canvas-legend').innerHTML = `
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-3 h-3 rounded-full bg-cyan-400 inline-block"></span>
+                        <span>Partículas del medio (vibración)</span>
+                    </div>
+                    ${mechanicalMode === 'longitudinal' ? `
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-3 h-3 rounded-md bg-gradient-to-r from-red-600 to-transparent inline-block"></span>
+                        <span>Zonas de compresión (alta presión)</span>
+                    </div>` : `
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-4 h-0.5 bg-indigo-400 inline-block"></span>
+                        <span>Línea elástica de la onda</span>
+                    </div>`}
+                `;
+
+                // Actualizar panel lateral derecho
+                document.getElementById('info-title').innerHTML = `<i data-lucide="volume-2" class="w-6 h-6 text-indigo-400"></i> Ondas Mecánicas`;
+                document.getElementById('info-content').innerHTML = `
+                    <p>Las <strong>ondas mecánicas</strong> son perturbaciones que viajan a través de un <strong>medio material</strong> (sólido, líquido o gaseoso). La energía se propaga debido a las interacciones elásticas entre las partículas del medio.</p>
+                    
+                    <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800 space-y-2">
+                        <p class="text-xs"><strong>${mechanicalMode === 'longitudinal' ? 'Modo Longitudinal (Sonido)' : 'Modo Transversal (Cuerda)'}:</strong></p>
+                        <p class="text-xs text-slate-400">
+                            ${mechanicalMode === 'longitudinal' 
+                            ? 'Las partículas vibran en la <strong>misma dirección</strong> que viaja la onda, creando zonas de compresión (mucha densidad) y rarefacción (baja densidad).' 
+                            : 'Las partículas del medio oscilan en un eje <strong>perpendicular</strong> a la dirección del avance de la onda.'}
+                        </p>
+                    </div>
+
+                    <p class="text-xs text-slate-400"><strong>¡Prueba esto!</strong> Presiona "Escuchar Audio" para activar el sintetizador y varía la frecuencia. Cuanto mayor sea la frecuencia, más agudo será el tono audible y más cortas serán las zonas de compresión.</p>
+                `;
+
+                // Actualizar tabla comparativa
+                document.getElementById('comp-medio').innerText = "Sí (Materia)";
+                document.getElementById('comp-medio').className = "text-emerald-400 font-bold";
+                document.getElementById('comp-speed').innerText = isVacuumActive ? "0 m/s (Sin propagación)" : "~343 m/s (en Aire)";
+                document.getElementById('comp-type').innerText = mechanicalMode === 'longitudinal' ? "Longitudinal" : "Transversal";
+                document.getElementById('comp-example').innerText = mechanicalMode === 'longitudinal' ? "Sonido audible" : "Cuerda de guitarra, Sismos S";
+                
+                document.getElementById('fun-fact').innerText = "¡En el espacio nadie puede oír tus gritos! En ausencia de átomos (vacío), no hay partículas para colisionar, por lo tanto el sonido no puede existir.";
+
+                document.getElementById('canvas-status').innerText = isVacuumActive ? "Medio: Vacío Absoluto" : "Medio: Aire (1 atm)";
+                
+                lucide.createIcons();
+
+            } else {
+                // ELECTROMAGNÉTICAS
+                const freq = parseInt(document.getElementById('slider-freq-em').value);
+                const amp = parseInt(document.getElementById('slider-amp-em').value);
+                
+                let colorName = getColorNameFromFrequency(freq);
+                document.getElementById('label-freq-em').innerText = `${freq} THz (${colorName})`;
+                document.getElementById('label-amp-em').innerText = `${amp}%`;
+                
+                document.getElementById('val-freq-display').innerText = `${freq} THz`;
+                document.getElementById('val-freq-display').className = "text-purple-400 font-bold";
+                
+                // Calcular longitud de onda de la luz: lambda = c / f (c = 3e8 m/s, f en THz = 1e12 Hz)
+                const lambdanm = ((3e17) / (freq * 1e12)).toFixed(0);
+                document.getElementById('extra-spec-display').innerHTML = `Longitud de onda (λ): <span class="text-purple-300 font-bold">${lambdanm} nm</span>`;
+
+                // Actualizar leyenda del canvas
+                document.getElementById('canvas-legend').innerHTML = `
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-4 h-0.5 bg-red-500 inline-block"></span>
+                        <span>Campo Eléctrico (E)</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-4 h-0.5 bg-blue-500 inline-block"></span>
+                        <span>Campo Magnético (B)</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-3 h-3 rounded-full bg-purple-500/20 border border-purple-500 inline-block animate-pulse"></span>
+                        <span>Fotones oscilantes</span>
+                    </div>
+                `;
+
+                // Detener el audio si estaba activo (las ondas electromagnéticas no producen sonido físico de este tipo)
+                if (isAudioPlaying) {
+                    stopAudio();
+                }
+
+                // Actualizar panel lateral derecho
+                document.getElementById('info-title').innerHTML = `<i data-lucide="zap" class="w-6 h-6 text-purple-400"></i> Ondas EM`;
+                document.getElementById('info-content').innerHTML = `
+                    <p>Las <strong>ondas electromagnéticas</strong> son causadas por cargas eléctricas en aceleración. Consisten en un <strong>campo eléctrico (rojo)</strong> y un <strong>campo magnético (azul)</strong> que oscilan mutuamente perpendiculares entre sí y autopropagan la energía.</p>
+                    
+                    <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800 space-y-1">
+                        <p class="text-xs"><strong>Región Actual: ${emSpectrumMode === 'visible' ? 'Espectro Visible' : emSpectrumMode.toUpperCase()}</strong></p>
+                        <p class="text-xs text-slate-400">
+                            ${getSpectrumDescription(emSpectrumMode, freq)}
+                        </p>
+                    </div>
+
+                    <p class="text-xs text-slate-400"><strong>¡Prueba esto!</strong> Varía el slider del color en el espectro visible para notar cómo una mayor frecuencia desplaza la luz hacia el azul/violeta con ondas mucho más energéticas y comprimidas.</p>
+                `;
+
+                // Actualizar tabla comparativa
+                document.getElementById('comp-medio').innerText = "No requiere (Propaga en vacío)";
+                document.getElementById('comp-medio').className = "text-indigo-400 font-bold";
+                document.getElementById('comp-speed').innerText = "~299,792 km/s (Velocidad de la luz)";
+                document.getElementById('comp-type').innerText = "Estrictamente Transversal";
+                document.getElementById('comp-example').innerText = getSpectrumExample(emSpectrumMode);
+                
+                document.getElementById('fun-fact').innerText = "La luz del Sol viaja 150 millones de kilómetros a través del vacío absoluto del espacio para llegar a la Tierra, tardando aproximadamente 8 minutos y 20 segundos.";
+                
+                document.getElementById('canvas-status').innerText = "Medio: Vacío o Materia (Sin cambios)";
+
+                lucide.createIcons();
+            }
+        }
+
+        // --- MANEJO DE AUDIO DE FORMA SEGURA ---
+        function toggleAudio() {
+            if (isAudioPlaying) {
+                stopAudio();
+            } else {
+                startAudio();
+            }
+        }
+
+        function startAudio() {
+            try {
+                // Crear contexto de audio si no existe
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+
+                // Asegurar que el contexto se reactive tras el bloqueo del navegador
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+
+                const freq = parseInt(document.getElementById('slider-freq-mec').value);
+                const amp = parseInt(document.getElementById('slider-amp-mec').value);
+
+                oscillator = audioCtx.createOscillator();
+                gainNode = audioCtx.createGain();
+
+                oscillator.type = 'sine'; // Onda senoidal limpia
+                oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                
+                // Reducir la ganancia drásticamente para proteger oídos
+                gainNode.gain.setValueAtTime((amp / 100) * 0.1, audioCtx.currentTime);
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+
+                oscillator.start();
+                
+                isAudioPlaying = true;
+                document.getElementById('text-audio').innerText = "Silenciar Audio";
+                document.getElementById('btn-audio').classList.replace('bg-indigo-600', 'bg-red-600');
+                document.getElementById('btn-audio').classList.replace('hover:bg-indigo-500', 'hover:bg-red-500');
+                document.getElementById('icon-audio').setAttribute('data-lucide', 'volume-x');
+                lucide.createIcons();
+            } catch (error) {
+                console.error("No se pudo iniciar el AudioContext:", error);
+            }
+        }
+
+        function stopAudio() {
+            if (oscillator) {
+                oscillator.stop();
+                oscillator.disconnect();
+                oscillator = null;
+            }
+            if (gainNode) {
+                gainNode.disconnect();
+                gainNode = null;
+            }
+            isAudioPlaying = false;
+            document.getElementById('text-audio').innerText = "Escuchar Audio";
+            document.getElementById('btn-audio').classList.replace('bg-red-600', 'bg-indigo-600');
+            document.getElementById('btn-audio').classList.replace('hover:bg-red-500', 'hover:bg-indigo-500');
+            document.getElementById('icon-audio').setAttribute('data-lucide', 'play');
+            lucide.createIcons();
+        }
+
+        // --- EFECTO DE VACÍO PARA ONDAS MECÁNICAS ---
+        function toggleVacuum() {
+            isVacuumActive = !isVacuumActive;
+            
+            const btn = document.getElementById('btn-vacuum');
+            const overlay = document.getElementById('vacuum-overlay');
+            const overlayText = document.getElementById('vacuum-text');
+            const icon = document.getElementById('icon-vacuum');
+            
+            if (isVacuumActive) {
+                // Activar vacío
+                btn.className = "flex items-center justify-center gap-2 px-4 py-3 bg-red-950/40 text-red-300 font-bold rounded-xl border border-red-800 shadow-lg transition-all duration-200";
+                overlay.style.backgroundColor = "rgba(2, 6, 23, 0.85)";
+                overlayText.style.opacity = '1';
+                overlayText.style.transform = 'translateY(0)';
+                document.getElementById('text-vacuum').innerText = "Restaurar Aire";
+                icon.setAttribute('data-lucide', 'refresh-cw');
+                
+                // Detener audio inmediatamente
+                if (isAudioPlaying) {
+                    stopAudio();
+                }
+            } else {
+                // Quitar vacío
+                btn.className = "flex items-center justify-center gap-2 px-4 py-3 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold rounded-xl border border-slate-700/80 transition-all duration-200";
+                overlay.style.backgroundColor = "rgba(2, 6, 23, 0)";
+                overlayText.style.opacity = '0';
+                overlayText.style.transform = 'translateY(1rem)';
+                document.getElementById('text-vacuum').innerText = "Quitar el Aire (Vacío)";
+                icon.setAttribute('data-lucide', 'wind');
+            }
+            
+            lucide.createIcons();
+            updateControls();
+        }
+
+        // --- SALTO DE ESPECTRO EM ---
+        function jumpToSpectrum(region) {
+            emSpectrumMode = region;
+            const slider = document.getElementById('slider-freq-em');
+            
+            if (region === 'visible') {
+                slider.value = 480;
+                document.getElementById('wave-badge').innerText = "Onda EM: Espectro Visible";
+            } else {
+                document.getElementById('wave-badge').innerText = `Onda EM: Región ${region.toUpperCase()}`;
+            }
+            
+            updateControls();
+        }
+
+        // --- AUXILIARES DEL ESPECTRO ---
+        function getColorNameFromFrequency(freq) {
+            if (freq < 420) return "Infrarrojo Profundo";
+            if (freq >= 420 && freq < 480) return "Rojo";
+            if (freq >= 480 && freq < 510) return "Naranja";
+            if (freq >= 510 && freq < 540) return "Amarillo";
+            if (freq >= 540 && freq < 610) return "Verde";
+            if (freq >= 610 && freq < 670) return "Cian";
+            if (freq >= 670 && freq < 730) return "Azul";
+            if (freq >= 730 && freq <= 789) return "Violeta";
+            return "Ultravioleta cercano";
+        }
+
+        function getColorHexFromFrequency(freq) {
+            // Devuelve colores aproximados de la física del arcoiris basados en terahercios
+            if (freq < 420) return "#800000"; // Rojo opaco
+            if (freq >= 420 && freq < 480) return "#ef4444"; // Rojo vibrante
+            if (freq >= 480 && freq < 510) return "#f97316"; // Naranja
+            if (freq >= 510 && freq < 540) return "#eab308"; // Amarillo
+            if (freq >= 540 && freq < 610) return "#22c55e"; // Verde
+            if (freq >= 610 && freq < 670) return "#06b6d4"; // Cian
+            if (freq >= 670 && freq < 730) return "#3b82f6"; // Azul
+            if (freq >= 730 && freq <= 789) return "#a855f7"; // Violeta
+            return "#6b21a8"; // Violeta oscuro
+        }
+
+        function getSpectrumDescription(region, freq) {
+            switch(region) {
+                case 'radio':
+                    return "Baja frecuencia, gran longitud de onda. Usada para telecomunicaciones a largas distancias sin afectar el cuerpo biológico.";
+                case 'micro':
+                    return "Hace vibrar las moléculas de agua generando fricción calórica. Ideal para hornos de microondas y el WiFi doméstico.";
+                case 'infra':
+                    return "Casi toda la radiación térmica emitida por cuerpos calientes (como tú mismo) se ubica en el infrarrojo.";
+                case 'visible':
+                    return `La única estrecha franja que el ojo humano puede procesar. A ${freq} THz, el cerebro lo interpreta como el color <strong>${getColorNameFromFrequency(freq)}</strong>.`;
+                case 'uv':
+                    return "Posee la suficiente energía para destruir enlaces químicos, causar quemaduras de sol y es desinfectante.";
+                case 'xray':
+                    return "Altamente ionizante y penetrante. Atraviesa tejidos blandos pero choca con materiales de alta densidad como los huesos.";
+                case 'gamma':
+                    return "La radiación EM más energética del cosmos. Liberada en colisiones estelares y reacciones de fisión/fusión nuclear.";
+                default:
+                    return "";
+            }
+        }
+
+        function getSpectrumExample(region) {
+            switch(region) {
+                case 'radio': return "Señales de radio AM/FM";
+                case 'micro': return "Hornos, Wi-Fi 5G";
+                case 'infra': return "Controles remotos, calor corporal";
+                case 'visible': return "Arcoíris, luz de linternas";
+                case 'uv': return "Luz solar quemadora";
+                case 'xray': return "Radiografías médicas";
+                case 'gamma': return "Reacciones nucleares, pulsares";
+                default: return "Luz solar";
+            }
+        }
+
+        // --- SISTEMA DE RENDERIZACIÓN DE ANIMACIÓN (CANVAS) ---
+        let time = 0;
+        
+        // Creamos una lista fija de partículas para simular el medio físico de forma ordenada
+        const particles = [];
+        const numParticlesX = 35;
+        const numParticlesY = 15;
+
+        function animate() {
+            draw();
+            time += 0.05;
+            animationFrameId = requestAnimationFrame(animate);
+        }
+
+        function draw() {
+            // Limpiar canvas
+            ctx.fillStyle = "#020617";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            if (waveType === 'mecanicas') {
+                drawMechanicalWave();
+            } else {
+                drawElectromagneticWave();
+            }
+        }
+
+        function drawMechanicalWave() {
+            const freq = parseInt(document.getElementById('slider-freq-mec').value);
+            const amp = parseInt(document.getElementById('slider-amp-mec').value);
+            
+            // Frecuencia visual ajustada
+            const visualFreq = freq * 0.00015;
+            const visualAmp = amp * 0.4;
+            
+            // Si el vacío está activo, las partículas pierden energía y se calman
+            const activeAmp = isVacuumActive ? 0 : visualAmp;
+
+            const spacingX = canvas.width / (numParticlesX + 1);
+            const spacingY = canvas.height / (numParticlesY + 1);
+
+            // Dibujar las partículas de aire del medio
+            for (let i = 0; i < numParticlesX; i++) {
+                const baseX = (i + 1) * spacingX;
+                
+                // Calcular desfase de onda según la distancia desde el emisor izquierdo
+                const phase = (baseX * visualFreq) - (time * (freq * 0.05));
+                
+                // Calcular desplazamiento de la partícula
+                let displaceX = 0;
+                let displaceY = 0;
+                
+                if (mechanicalMode === 'longitudinal') {
+                    displaceX = Math.sin(phase) * activeAmp;
+                } else {
+                    displaceY = Math.sin(phase) * activeAmp;
+                }
+
+                for (let j = 0; j < numParticlesY; j++) {
+                    const baseY = (j + 1) * spacingY;
+                    
+                    const x = baseX + displaceX;
+                    const y = baseY + displaceY;
+
+                    // Dibujar partícula
+                    ctx.beginPath();
+                    ctx.arc(x, y, 3, 0, Math.PI * 2);
+                    
+                    // Colorear diferente para destacar compresión o movimiento libre
+                    if (!isVacuumActive && mechanicalMode === 'longitudinal') {
+                        // Resaltar partículas que están muy cerca de sus vecinas (Compresión)
+                        const localDensity = Math.cos(phase);
+                        if (localDensity > 0.6) {
+                            ctx.fillStyle = `rgba(239, 68, 68, ${0.4 + localDensity * 0.6})`; // Rojo para compresión
+                        } else {
+                            ctx.fillStyle = "rgba(34, 211, 238, 0.7)"; // Cian para medio normal
+                        }
+                    } else {
+                        ctx.fillStyle = isVacuumActive ? "rgba(100, 116, 139, 0.3)" : "rgba(34, 211, 238, 0.7)";
+                    }
+                    ctx.fill();
+                }
+
+                // Dibujar línea guía de onda transversal para mayor claridad
+                if (mechanicalMode === 'transversal' && i === Math.floor(numParticlesX / 2)) {
+                    ctx.beginPath();
+                    ctx.strokeStyle = "rgba(99, 102, 241, 0.25)";
+                    ctx.setLineDash([5, 5]);
+                    ctx.moveTo(0, canvas.height / 2);
+                    ctx.lineTo(canvas.width, canvas.height / 2);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                }
+            }
+
+            // Si es longitudinal y no hay vacío, dibujar un altavoz conceptual al lado izquierdo
+            if (!isVacuumActive) {
+                drawSpeaker(activeAmp);
+            }
+        }
+
+        function drawSpeaker(amplitude) {
+            const h = canvas.height;
+            const w = 40;
+            const pump = Math.sin(time * 5) * (amplitude * 0.1);
+
+            ctx.fillStyle = "rgba(30, 41, 59, 0.8)";
+            ctx.beginPath();
+            ctx.moveTo(5, h/2 - 30);
+            ctx.lineTo(20 + pump, h/2 - 30);
+            ctx.lineTo(35 + pump, h/2 - 50);
+            ctx.lineTo(35 + pump, h/2 + 50);
+            ctx.lineTo(20 + pump, h/2 + 30);
+            ctx.lineTo(5, h/2 + 30);
+            ctx.closePath();
+            ctx.fill();
+            ctx.strokeStyle = "rgba(99, 102, 241, 0.8)";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+
+        function drawElectromagneticWave() {
+            const freq = parseInt(document.getElementById('slider-freq-em').value);
+            const amp = parseInt(document.getElementById('slider-amp-em').value);
+            
+            // Frecuencia visualizada para la luz
+            const visualFreq = freq * 0.0003;
+            const visualAmp = amp * 0.6;
+            const color = getColorHexFromFrequency(freq);
+
+            const midY = canvas.height / 2;
+
+            // Dibujar línea central (Eje de propagación)
+            ctx.beginPath();
+            ctx.strokeStyle = "rgba(148, 163, 184, 0.15)";
+            ctx.lineWidth = 1.5;
+            ctx.moveTo(0, midY);
+            ctx.lineTo(canvas.width, midY);
+            ctx.stroke();
+
+            // Dibujar ondas en 3D simulado con líneas de perspectiva
+            const steps = canvas.width;
+            
+            // 1. Campo Magnético (Simulado horizontal con perspectiva inclinada hacia abajo)
+            ctx.beginPath();
+            ctx.strokeStyle = "rgba(59, 130, 246, 0.8)"; // Azul
+            ctx.lineWidth = 2;
+            for (let x = 0; x < steps; x += 3) {
+                const phase = (x * visualFreq) - (time * 1.5);
+                const waveVal = Math.sin(phase) * visualAmp;
+                
+                // Efecto oblicuo para 3D (el campo magnético oscila en un plano inclinado)
+                const projX = x + waveVal * 0.3;
+                const projY = midY + waveVal * 0.5;
+
+                if (x === 0) {
+                    ctx.moveTo(projX, projY);
+                } else {
+                    ctx.lineTo(projX, projY);
+                }
+            }
+            ctx.stroke();
+
+            // 2. Campo Eléctrico (Vertical directo)
+            ctx.beginPath();
+            ctx.strokeStyle = "rgba(239, 68, 68, 0.8)"; // Rojo
+            ctx.lineWidth = 2.5;
+            for (let x = 0; x < steps; x += 3) {
+                const phase = (x * visualFreq) - (time * 1.5);
+                const waveVal = Math.sin(phase) * visualAmp;
+                const y = midY - waveVal;
+
+                if (x === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.stroke();
+
+            // 3. Dibujar vectores conectores en algunos puntos para representar intensidad de campo
+            for (let x = 30; x < steps; x += 40) {
+                const phase = (x * visualFreq) - (time * 1.5);
+                const waveVal = Math.sin(phase) * visualAmp;
+                
+                // Vector Eléctrico (Rojo)
+                ctx.beginPath();
+                ctx.strokeStyle = "rgba(239, 68, 68, 0.4)";
+                ctx.lineWidth = 1.5;
+                ctx.moveTo(x, midY);
+                ctx.lineTo(x, midY - waveVal);
+                ctx.stroke();
+                
+                // Vector Magnético (Azul)
+                const projX = x + waveVal * 0.3;
+                const projY = midY + waveVal * 0.5;
+                ctx.beginPath();
+                ctx.strokeStyle = "rgba(59, 130, 246, 0.4)";
+                ctx.moveTo(x, midY);
+                ctx.lineTo(projX, projY);
+                ctx.stroke();
+            }
+
+            // 4. Dibujar paquetes de energía (fotones/partículas) viajando sobre el espectro visible
+            if (emSpectrumMode === 'visible') {
+                for (let i = 0; i < 4; i++) {
+                    const travelX = ((time * 120) + (i * (canvas.width / 4))) % canvas.width;
+                    const phase = (travelX * visualFreq) - (time * 1.5);
+                    const waveVal = Math.sin(phase) * visualAmp;
+                    
+                    ctx.beginPath();
+                    ctx.arc(travelX, midY - waveVal, 6, 0, Math.PI*2);
+                    ctx.fillStyle = color;
+                    ctx.shadowColor = color;
+                    ctx.shadowBlur = 15;
+                    ctx.fill();
+                    ctx.shadowBlur = 0; // reset
+                }
+            }
+        }
+    </script>
+</body>
+</html>
