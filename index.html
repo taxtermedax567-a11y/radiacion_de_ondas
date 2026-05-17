@@ -51,7 +51,7 @@
             </div>
             
             <!-- Selector de tipo de onda principal -->
-            <div class="flex bg-slate-950 p-1 rounded-xl border border-slate-800 shadow-inner">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-2 bg-slate-950 p-1 rounded-xl border border-slate-800 shadow-inner">
                 <button id="btn-mecanicas" onclick="switchWaveType('mecanicas')" class="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-300 bg-indigo-600 text-white shadow-md">
                     <i data-lucide="volume-2" class="w-4 h-4"></i>
                     Ondas Mecánicas
@@ -60,6 +60,10 @@
                     <i data-lucide="zap" class="w-4 h-4"></i>
                     Ondas Electromagnéticas
                 </button>
+                <a href="indexreactor.html" class="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-300 bg-emerald-500 text-slate-950 hover:bg-emerald-400">
+                    <i data-lucide="arrow-right-circle" class="w-4 h-4"></i>
+                    Ir a Reactor
+                </a>
             </div>
         </div>
     </header>
@@ -300,7 +304,13 @@
 
     <!-- Footer -->
     <footer class="border-t border-slate-800/80 bg-slate-950 py-6 px-6 text-center text-xs text-slate-500">
-        <p>© 2026 Laboratorio Virtual de Física Interactiva. Creado con fines educativos.</p>
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
+            <p>© 2026 Laboratorio Virtual de Física Interactiva. Creado con fines educativos.</p>
+            <a href="indexreactor.html" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-emerald-500 text-slate-950 rounded-full text-sm font-semibold transition hover:bg-emerald-400">
+                <i data-lucide="arrow-right-circle" class="w-4 h-4"></i>
+                Ir a Reactor
+            </a>
+        </div>
     </footer>
 
     <!-- Script principal de simulación -->
