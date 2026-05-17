@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consola de Control: Reactor Nuclear Interactivo</title>
+    <!-- Tailwind CSS para el diseño de consola premium -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons para indicadores táctiles y gráficos -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Share+Tech+Mono&display=swap');
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+        .font-mono-tech {
+            font-family: 'Share Tech Mono', monospace;
+        }
+        
+        /* Animaciones para flujos físicos */
+        @keyframes flow-left-right {
+            0% { stroke-dashoffset: 40; }
+            100% { stroke-dashoffset: 0; }
+        }
+        
+        .animated-flow-primary {
+            stroke-dasharray: 8, 4;
+            animation: flow-left-right 1.5s linear infinite;
+        }
+        .animated-flow-secondary {
+            stroke-dasharray: 6, 6;
+            animation: flow-left-right 1s linear infinite;
+        }
+        .animated-flow-cooling {
+            stroke-dasharray: 10, 5;
+            animation: flow-left-right 2s linear infinite;
+        }
+        
+        /* Rotación dinámica de la turbina */
+        @keyframes spin-turbine {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .turbine-blade {
+            transform-origin: 530px 200px;
+        }
+        
+        /* Brillo reactivo para el núcleo */
+        .core-glow {
+            transition: fill 0.5s ease, filter 0.5s ease, opacity 0.5s ease;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-rose-500 selection:text-white">
+
+    <!-- Header de la Consola de Control (Más compacto) -->
+    <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur-md sticky top-0 z-50 px-4 py-2">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-2">
+            <div class="flex items-center gap-2">
+                <div class="p-1.5 bg-rose-600/20 text-rose-400 rounded-lg border border-rose-500/30">
+                    <i data-lucide="shield-alert" class="w-5 h-5 animate-pulse"></i>
+                </div>
+                <div>
+                    <h1 class="text-base font-extrabold tracking-tight bg-gradient-to-r from-amber-400 via-rose-400 to-indigo-400 bg-clip-text text-transparent">
+                        Consola de Monitoreo Nuclear v5.0
+                    </h1>
+                    <p class="text-[10px] text-slate-400 font-mono-tech">SISTEMA INMERSIVO DE PUESTA EN MARCHA</p>
+                </div>
+            </div>
+            
+            <!-- Indicadores Rápidos de la Red Eléctrica -->
+            <div class="flex items-center gap-3 font-mono-tech text-xs bg-slate-950 px-3 py-1 rounded-lg border border-slate-800">
+                <div class="flex items-center gap-1.5 border-r border-slate-800 pr-3">
+                    <span id="status-indicator-ping" class="w-2 h-2 rounded-full bg-slate-500"></span>
+                    <span class="text-slate-400 text-[11px]">ESTADO:</span>
+                    <span id="txt-status" class="text-slate-400 font-bold text-[11px]">APAGADA</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-500"></i>
+                    <span class="text-slate-400 text-[11px]">RED:</span>
+                    <span id="txt-megawatts" class="text-slate-500 font-bold text-[11px]">0 MW</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Área Principal de Simulación (Distribución compacta) -->
+    <main class="flex-grow max-w-7xl mx-auto w-full p-3 grid grid-cols-1 lg:grid-cols-12 gap-4">
+        
+        <!-- Panel Izquierdo: Guía de Puesta en Marcha (3/12) -->
+        <div class="lg:col-span-3 flex flex-col gap-4">
+            
+            <!-- Tarjeta de Controles de Energía y Arranque -->
+            <div class="bg-slate-900 rounded-xl border border-slate-800 p-4 shadow-xl space-y-4">
+                <div>
+                    <h3 class="font-bold text-xs text-slate-200 uppercase tracking-wider flex items-center gap-1.5 font-mono-tech">
+                        <i data-lucide="activity" class="text-emerald-400 w-4 h-4"></i>
+                        Paso a Paso: Arranque
+                    </h3>
+                </div>
+                
+                <!-- CHECKLIST DE PASOS COMPACTO -->
+                <div class="space-y-2 font-mono-tech text-xs">
+                    <!-- PASO 1 -->
+                    <div id="step-1-card" class="p-2 bg-slate-950 rounded-lg border border-slate-800 flex items-start gap-2 transition-all">
+                        <button id="btn-step-1" onclick="toggleCoolant()" class="mt-0.5 p-1 bg-slate-800 text-slate-400 hover:text-white rounded transition-all">
+                            <i data-lucide="power" class="w-3.5 h-3.5" id="icon-step-1"></i>
+                        </button>
+                        <div class="min-w-0">
+                            <p class="font-bold flex items-center gap-1 text-[11px]" id="title-step-1">
+                                <span class="truncate">1. Activar Agua</span>
+                                <i data-lucide="circle-check" class="w-3.5 h-3.5 text-emerald-400 hidden" id="check-step-1"></i>
+                            </p>
+                            <p class="text-[9px] text-slate-500 leading-tight">Inicia refrigeración primaria/secundaria.</p>
+                        </div>
+                    </div>
+
+                    <!-- PASO 2 -->
+                    <div id="step-2-card" class="p-2 bg-slate-950 rounded-lg border border-slate-800/40 opacity-50 flex items-start gap-2 transition-all">
+                        <div class="mt-1">
+                            <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5 text-slate-400"></i>
+                        </div>
+                        <div class="w-full min-w-0 space-y-1">
+                            <p class="font-bold flex items-center gap-1 text-[11px]" id="title-step-2">
+                                <span class="truncate">2. Extraer Barras</span>
+                                <i data-lucide="circle-check" class="w-3.5 h-3.5 text-emerald-400 hidden" id="check-step-2"></i>
+                            </p>
+                            <!-- Slider de Barras de Contención -->
+                            <div class="space-y-0.5">
+                                <div class="flex justify-between text-[8px]">
+                                    <span class="text-slate-500">Boro/Cadmio:</span>
+                                    <span id="val-rods" class="text-rose-400 font-bold">0%</span>
+                                </div>
+                                <input type="range" id="slider-rods" min="0" max="100" step="1" value="0" disabled oninput="updateCoreState()" class="w-full h-1 bg-slate-900 rounded appearance-none cursor-pointer accent-rose-500">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PASO 3 -->
+                    <div id="step-3-card" class="p-2 bg-slate-950 rounded-lg border border-slate-800/40 opacity-50 flex items-start gap-2 transition-all">
+                        <div class="mt-0.5">
+                            <i data-lucide="thermometer" class="w-3.5 h-3.5 text-slate-400"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="font-bold flex items-center gap-1 text-[11px]" id="title-step-3">
+                                <span class="truncate">3. Temperatura</span>
+                                <i data-lucide="circle-check" class="w-3.5 h-3.5 text-emerald-400 hidden" id="check-step-3"></i>
+                            </p>
+                            <p class="text-[9px] text-slate-500 leading-tight">Llegar a zona crítica (280°C - 380°C).</p>
+                        </div>
+                    </div>
+
+                    <!-- PASO 4 -->
+                    <div id="step-4-card" class="p-2 bg-slate-950 rounded-lg border border-slate-800/40 opacity-50 flex items-start gap-2 transition-all">
+                        <button id="btn-step-4" disabled onclick="toggleGridSync()" class="mt-0.5 p-1 bg-slate-800 text-slate-400 hover:text-white rounded transition-all cursor-not-allowed">
+                            <i data-lucide="power" class="w-3.5 h-3.5"></i>
+                        </button>
+                        <div class="min-w-0">
+                            <p class="font-bold flex items-center gap-1 text-[11px]" id="title-step-4">
+                                <span class="truncate">4. Sincronizar Red</span>
+                                <i data-lucide="circle-check" class="w-3.5 h-3.5 text-emerald-400 hidden" id="check-step-4"></i>
+                            </p>
+                            <p class="text-[9px] text-slate-500 leading-tight">Acoplar alternador al sistema eléctrico.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel de Telemetría de Seguridad Activo -->
+                <div class="pt-3 border-t border-slate-800/60 space-y-2 font-mono-tech text-xs">
+                    <h4 class="font-bold text-[9px] text-slate-400 uppercase tracking-wider">Telemetría de Seguridad</h4>
+                    <div class="grid grid-cols-3 gap-1.5">
+                        <div class="bg-slate-950 p-1.5 rounded-lg border border-slate-800 text-center">
+                            <span class="text-[8px] text-slate-500 block uppercase">Reactiv.</span>
+                            <span id="ind-reactivity" class="text-rose-400 font-bold text-xs">0%</span>
+                        </div>
+                        <div class="bg-slate-950 p-1.5 rounded-lg border border-slate-800 text-center">
+                            <span class="text-[8px] text-slate-500 block uppercase">Temp.</span>
+                            <span id="ind-temp" class="text-amber-500 font-bold text-xs">20 °C</span>
+                        </div>
+                        <div class="bg-slate-950 p-1.5 rounded-lg border border-slate-800 text-center">
+                            <span class="text-[8px] text-slate-500 block uppercase">Presión</span>
+                            <span id="ind-pressure" class="text-cyan-400 font-bold text-xs">1 bar</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botón SCRAM (Parada de Emergencia Absoluta) -->
+                <button onclick="triggerScram()" class="w-full py-2.5 bg-red-600/20 hover:bg-red-600 active:bg-red-700 text-red-400 hover:text-white font-extrabold text-xs rounded-lg border border-red-500/30 hover:border-red-500 transition-all duration-200 flex items-center justify-center gap-1.5 group">
+                    <i data-lucide="octagon-alert" class="w-4 h-4 group-hover:animate-spin"></i>
+                    PARADA DE EMERGENCIA [SCRAM]
+                </button>
+            </div>
+
+        </div>
+
+        <!-- Panel Central: Esquema Interactivo Vectorial del Reactor (6/12) -->
+        <div class="lg:col-span-6 flex flex-col gap-4">
+            
+            <!-- Canvas/SVG Container -->
+            <div class="bg-slate-900 rounded-xl border border-slate-800 p-3 shadow-xl relative flex flex-col items-center">
+                <div class="w-full flex justify-between items-center mb-2">
+                    <span class="text-[10px] text-rose-300 font-bold bg-rose-500/10 px-2 py-0.5 rounded-full border border-rose-500/20 flex items-center gap-1">
+                        <i data-lucide="eye" class="w-3 h-3 animate-pulse"></i>
+                        Coloca el mouse sobre el diagrama (1 al 6)
+                    </span>
+                    <span class="text-[10px] text-slate-400 font-mono-tech" id="hover-current-node">Foco actual: Ninguno</span>
+                </div>
+
+                <!-- Esquema Interactivo SVG -->
+                <div class="w-full aspect-[4/3] bg-slate-950 rounded-lg border border-slate-800 p-1 relative flex items-center justify-center overflow-hidden">
+                    <svg id="reactor-svg" viewBox="0 0 800 600" class="w-full h-full">
+                        <defs>
+                            <!-- Degradados para efectos visuales de calor -->
+                            <radialGradient id="reactor-glow" cx="50%" cy="50%" r="50%">
+                                <stop offset="0%" stop-color="#22d3ee" stop-opacity="0.9" />
+                                <stop offset="50%" stop-color="#0284c7" stop-opacity="0.4" />
+                                <stop offset="100%" stop-color="#020617" stop-opacity="0" />
+                            </radialGradient>
+                        </defs>
+
+                        <!-- EDIFICIO DE CONTENCIÓN (Hormigón de Seguridad) -->
+                        <g id="node-containment" class="cursor-pointer group" onmouseover="focusComponent('containment')" onmouseleave="blurComponent()">
+                            <path d="M 50 550 L 50 250 A 200 200 0 0 1 450 250 L 450 550 Z" fill="none" stroke="#475569" stroke-width="12" class="group-hover:stroke-rose-500 transition-colors duration-200" />
+                            <path d="M 50 550 L 50 250 A 200 200 0 0 1 450 250 L 450 550 Z" fill="#1e293b" fill-opacity="0.2" />
+                            <text x="250" y="80" text-anchor="middle" fill="#94a3b8" font-size="14" font-weight="bold" class="pointer-events-none">EDIFICIO DE CONTENCIÓN</text>
+                        </g>
+
+                        <!-- TUBERÍA DEL CIRCUITO PRIMARIO (Agua a alta presión para enfriar) -->
+                        <g id="node-primary-loop" class="cursor-pointer group" onmouseover="focusComponent('primary-loop')" onmouseleave="blurComponent()">
+                            <!-- Tubería caliente (Ida) -->
+                            <path d="M 180 380 L 320 380" fill="none" stroke="#ef4444" stroke-width="20" class="group-hover:stroke-red-400 transition-all" />
+                            <path id="flow-prim-hot" d="M 180 380 L 320 380" fill="none" stroke="#ffffff" stroke-width="2" class="opacity-0" />
+                            <!-- Tubería fría (Retorno) -->
+                            <path d="M 320 460 L 180 460" fill="none" stroke="#06b6d4" stroke-width="20" class="group-hover:stroke-cyan-300 transition-all" />
+                            <path id="flow-prim-cold" d="M 320 460 L 180 460" fill="none" stroke="#ffffff" stroke-width="2" class="opacity-0" style="animation-direction: reverse;" />
+                            <text x="250" y="445" text-anchor="middle" fill="#06b6d4" font-size="11" font-weight="bold" class="font-mono-tech">(2) REFRIGERACIÓN</text>
+                        </g>
+
+                        <!-- VASO DEL REACTOR (1) -->
+                        <g id="node-reactor-core" class="cursor-pointer group" onmouseover="focusComponent('reactor-core')" onmouseleave="blurComponent()">
+                            <!-- Cuerpo del reactor -->
+                            <rect x="80" y="280" width="120" height="240" rx="20" fill="#334155" stroke="#64748b" stroke-width="6" class="group-hover:stroke-rose-400 transition-colors" />
+                            
+                            <!-- Brillo reactivo de fisión (azul Cherenkov/Cyan) -->
+                            <circle id="core-glow-light" cx="140" cy="420" r="50" fill="url(#reactor-glow)" class="core-glow pointer-events-none opacity-0" />
+                            
+                            <!-- Combustible nuclear (Uranio-235) -->
+                            <rect x="110" y="360" width="15" height="110" fill="#94a3b8" stroke="#cbd5e1" stroke-width="2" />
+                            <rect x="142" y="360" width="15" height="110" fill="#94a3b8" stroke="#cbd5e1" stroke-width="2" />
+                            <rect x="175" y="360" width="15" height="110" fill="#94a3b8" stroke="#cbd5e1" stroke-width="2" />
+                            
+                            <!-- Barras de Control de Contención (Móviles) -->
+                            <g id="control-rods-svg">
+                                <line x1="117" y1="230" x2="117" y2="350" stroke="#f43f5e" stroke-width="6" stroke-linecap="round" />
+                                <line x1="150" y1="230" x2="150" y2="350" stroke="#f43f5e" stroke-width="6" stroke-linecap="round" />
+                                <line x1="182" y1="230" x2="182" y2="350" stroke="#f43f5e" stroke-width="6" stroke-linecap="round" />
+                                <!-- Soporte superior de las barras -->
+                                <rect x="105" y="220" width="90" height="10" fill="#e2e8f0" />
+                            </g>
+
+                            <text x="140" y="505" text-anchor="middle" fill="#ffffff" font-size="12" font-weight="bold" class="font-mono-tech">(1) REACTOR / NÚCLEO</text>
+                        </g>
+
+                        <!-- GENERADOR DE VAPOR (Intercambiador térmico) (3) -->
+                        <g id="node-steam-generator" class="cursor-pointer group" onmouseover="focusComponent('steam-generator')" onmouseleave="blurComponent()">
+                            <rect x="300" y="300" width="100" height="210" rx="30" fill="#334155" stroke="#475569" stroke-width="6" class="group-hover:stroke-rose-400 transition-colors" />
+                            <!-- Serpentín térmico interno -->
+                            <path d="M 330 380 C 360 380, 360 400, 330 400 C 360 400, 360 420, 330 420 C 360 420, 360 440, 330 440 C 360 440, 360 460, 330 460" fill="none" stroke="#ef4444" stroke-width="6" />
+                            <text x="350" y="490" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="bold" class="font-mono-tech">(3) GEN. VAPOR</text>
+                        </g>
+
+                        <!-- CIRCUITO SECUNDARIO Y TUBERÍAS DE VAPOR (4) -->
+                        <g id="node-steam-pipes" class="cursor-pointer group" onmouseover="focusComponent('steam-pipes')" onmouseleave="blurComponent()">
+                            <!-- Tubería vapor caliente hacia turbina -->
+                            <path d="M 350 300 L 350 200 L 500 200" fill="none" stroke="#f97316" stroke-width="14" class="group-hover:stroke-amber-400" />
+                            <path id="flow-sec-hot" d="M 350 300 L 350 200 L 500 200" fill="none" stroke="#ffffff" stroke-width="2" class="opacity-0" />
+                            
+                            <!-- Retorno de agua condensada -->
+                            <path d="M 500 440 L 350 440 L 350 470" fill="none" stroke="#3b82f6" stroke-width="12" />
+                            
+                            <text x="430" y="185" text-anchor="middle" fill="#f97316" font-size="12" font-weight="bold" class="font-mono-tech">(4) VAPOR</text>
+                        </g>
+
+                        <!-- TURBINA DE VAPOR (5) (Animación rotatoria en la hélice) -->
+                        <g id="node-turbine" class="cursor-pointer group" onmouseover="focusComponent('turbine')" onmouseleave="blurComponent()">
+                            <!-- Caja exterior de la turbina -->
+                            <polygon points="500,170 560,150 560,250 500,230" fill="#475569" stroke="#64748b" stroke-width="4" class="group-hover:stroke-rose-400" />
+                            
+                            <!-- Aspas animadas que giran si hay vapor -->
+                            <g id="turbine-blades-group">
+                                <line class="turbine-blade" x1="530" y1="160" x2="530" y2="240" stroke="#f8fafc" stroke-width="3" />
+                                <line class="turbine-blade" x1="500" y1="200" x2="560" y2="200" stroke="#cbd5e1" stroke-width="3" />
+                                <line class="turbine-blade" x1="510" y1="175" x2="550" y2="225" stroke="#94a3b8" stroke-width="2" />
+                                <line class="turbine-blade" x1="510" y1="225" x2="550" y2="175" stroke="#94a3b8" stroke-width="2" />
+                            </g>
+                            
+                            <text x="530" y="270" text-anchor="middle" fill="#ffffff" font-size="12" font-weight="bold" class="font-mono-tech">(5) TURBINA</text>
+                        </g>
+
+                        <!-- GENERADOR ELÉCTRICO / ALTERNADOR (6) -->
+                        <g id="node-generator" class="cursor-pointer group" onmouseover="focusComponent('generator')" onmouseleave="blurComponent()">
+                            <!-- Eje de transmisión -->
+                            <line x1="560" y1="200" x2="600" y2="200" stroke="#cbd5e1" stroke-width="8" />
+                            
+                            <!-- Generador -->
+                            <rect x="600" y="160" width="80" height="80" rx="10" fill="#0891b2" stroke="#22d3ee" stroke-width="4" class="group-hover:stroke-rose-400" />
+                            <circle cx="640" cy="200" r="20" fill="#0e7490" />
+                            <path d="M 630 200 L 650 200 M 640 190 L 640 210" stroke="#22d3ee" stroke-width="3" />
+                            
+                            <!-- Tendido eléctrico hacia afuera -->
+                            <path id="flow-grid" d="M 680 200 L 750 200 L 750 100" fill="none" stroke="#eab308" stroke-width="4" stroke-dasharray="5,5" class="opacity-0" />
+
+                            <text x="640" y="270" text-anchor="middle" fill="#22d3ee" font-size="12" font-weight="bold" class="font-mono-tech">(6) GENERADOR</text>
+                        </g>
+
+                        <!-- CONDENSADOR -->
+                        <g id="node-condenser" class="cursor-pointer group" onmouseover="focusComponent('condenser')" onmouseleave="blurComponent()">
+                            <rect x="480" y="350" width="130" height="90" fill="#1e293b" stroke="#475569" stroke-width="4" class="group-hover:stroke-rose-400" />
+                            <!-- Líneas de agua de enfriamiento que cruzan -->
+                            <line x1="480" y1="380" x2="610" y2="380" stroke="#06b6d4" stroke-width="4" />
+                            <line x1="480" y1="410" x2="610" y2="410" stroke="#06b6d4" stroke-width="4" />
+                            
+                            <text x="545" y="405" text-anchor="middle" fill="#94a3b8" font-size="11" font-weight="bold" class="font-mono-tech">CONDENSADOR</text>
+                        </g>
+
+                        <!-- TORRE DE REFRIGERACIÓN -->
+                        <g id="node-cooling-tower" class="cursor-pointer group" onmouseover="focusComponent('cooling-tower')" onmouseleave="blurComponent()">
+                            <!-- Silueta de la torre -->
+                            <path d="M 660 550 C 670 450, 680 350, 700 350 L 760 350 C 780 350, 790 450, 800 550 Z" fill="#1e293b" stroke="#475569" stroke-width="6" class="group-hover:stroke-rose-400" />
+                            
+                            <!-- Vapor saliendo por arriba -->
+                            <path id="flow-cooling-steam" d="M 710 330 Q 720 300 710 280 T 730 250 T 750 280" fill="none" stroke="#cbd5e1" stroke-width="6" stroke-linecap="round" stroke-dasharray="2,2" class="opacity-0" />
+                            <path id="flow-cooling-steam-2" d="M 740 330 Q 750 300 740 280 T 760 250" fill="none" stroke="#cbd5e1" stroke-width="4" stroke-linecap="round" stroke-dasharray="3,3" class="opacity-0" />
+
+                            <!-- Tuberías de agua de refrigeración conectadas al condensador -->
+                            <path d="M 610 380 L 680 380" fill="none" stroke="#06b6d4" stroke-width="12" />
+                            <path d="M 680 410 L 610 410" fill="none" stroke="#3b82f6" stroke-width="12" />
+
+                            <text x="730" y="460" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="bold" class="font-mono-tech">TORRE DE</text>
+                            <text x="730" y="480" text-anchor="middle" fill="#3b82f6" font-size="10" font-weight="bold" class="font-mono-tech">REFRIGERACIÓN</text>
+                        </g>
+
+                    </svg>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Panel Derecho: Explicador Científico Detallado (3/12) -->
+        <div class="lg:col-span-3 flex flex-col gap-4">
+            
+            <!-- Ventana de Información de Componentes (Más compacta) -->
+            <div id="panel-details" class="bg-gradient-to-b from-slate-900 to-rose-950/20 rounded-xl border border-slate-800 p-4 shadow-xl flex-grow flex flex-col justify-between space-y-3">
+                <div class="space-y-2">
+                    <div class="flex items-center gap-1.5 text-rose-400 font-extrabold tracking-wide uppercase text-[9px]">
+                        <span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping"></span>
+                        Diagnóstico del Componente
+                    </div>
+                    
+                    <h3 id="details-title" class="text-base font-bold text-slate-100 font-mono-tech leading-tight">
+                        Consola Lista para Encendido
+                    </h3>
+                    
+                    <div id="details-body" class="text-[11px] text-slate-400 space-y-2 leading-relaxed">
+                        <p class="text-emerald-400 font-bold">Instrucciones de generación:</p>
+                        <ol class="list-decimal pl-4 space-y-1">
+                            <li>Enciende bombas de agua en <span class="text-slate-200">Paso 1</span>.</li>
+                            <li>Sube las barras de boro/cadmio en <span class="text-slate-200">Paso 2</span>.</li>
+                            <li>Llega a zona crítica de calor en <span class="text-slate-200">Paso 3</span>.</li>
+                            <li>Conecta alternador a la red en <span class="text-slate-200">Paso 4</span>.</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <!-- Datos Históricos condensados -->
+                <div class="p-2.5 bg-slate-950/80 rounded-lg border border-slate-800/80 text-[10px] leading-snug">
+                    <p class="text-slate-300">
+                        Las barras de control (<strong class="text-amber-400">boro o cadmio</strong>) absorben neutrones, controlando la velocidad de la fisión del Uranio-235.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Panel de Fisión Interactiva Rápida (Más compacto) -->
+            <div class="bg-slate-900 rounded-xl border border-slate-800 p-4 shadow-xl space-y-2">
+                <div class="flex justify-between items-center text-[10px] font-mono-tech">
+                    <span class="text-slate-400 font-bold">Dinámica de Fisión:</span>
+                    <span id="txt-fission-count" class="text-slate-500 font-bold">Apagado</span>
+                </div>
+                <!-- Esquema simplificado de fisión animada -->
+                <div class="h-10 flex items-center justify-center bg-slate-950 rounded border border-slate-800 relative overflow-hidden" id="fission-micro-panel">
+                    <span class="text-[10px] text-slate-600 font-mono-tech">[Esperando Criticidad]</span>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer de la Central -->
+    <footer class="border-t border-slate-800/80 bg-slate-950 py-2 px-6 text-center text-[10px] text-slate-500 flex flex-col md:flex-row justify-between max-w-7xl mx-auto w-full gap-1">
+        <p>© 2026 Consola Interactiva Educativa.</p>
+        <p class="font-mono-tech">Sistemas de Seguridad: Activos</p>
+    </footer>
+
+    <!-- Script de Física Reactiva e Interactividad -->
+    <script>
+        // --- BASE DE DATOS DE COMPONENTES DEL REACTOR (Desde PDF 1 y 3) ---
+        const componentDb = {
+            'containment': {
+                title: "Edificio de Contención",
+                use: "Seguridad extrema, blindaje biológico y aislamiento del exterior.",
+                working: "Es una robusta estructura hermética, fabricada con hormigón armado de varios metros de espesor y recubrimiento interno de acero. Su diseño está previsto para soportar catástrofes externas (como caídas de aviones) y retener de forma segura cualquier vapor radiactivo o material fissionable en caso de un accidente interno grave (LOCA).",
+                fact: "Es la última línea de defensa estructural para evitar la dispersión de radiación al medio ambiente."
+            },
+            'reactor-core': {
+                title: "(1) Núcleo del Reactor y Uranio-235",
+                use: "Generar energía térmica mediante reacciones nucleares controladas en cadena.",
+                working: "Dentro de la vasija de presión de acero se bombean neutrones lentos hacia el combustible nuclear de Uranio-235. El uranio absorbe los neutrones, volviéndose inestable y dividiéndose en dos núcleos más ligeros (fisión). Este proceso desprende una ingente cantidad de calor continuo y de 2 a 3 neutrones extra que repiten el ciclo de fisión con otros átomos de uranio.",
+                fact: "La densidad energética del Uranio es inmensa: un solo gramo produce tanta energía como varias toneladas de carbón."
+            },
+            'primary-loop': {
+                title: "(2) Circuito de Agua Primario (Refrigeración)",
+                use: "Extraer el intenso calor generado por la fisión del núcleo del reactor.",
+                working: "El agua líquida circula a través del núcleo del reactor absorbiendo el calor extremo. Para evitar que el agua hierva a pesar de superar los 300°C, un aparato llamado 'Presurizador' la somete a una presión extremadamente alta (alrededor de 155 bares). Esto la mantiene líquida para maximizar el transporte de energía térmica hacia el intercambiador de calor.",
+                fact: "El agua del circuito primario nunca sale del edificio de contención ni entra en contacto con las turbinas por seguridad radiológica."
+            },
+            'steam-generator': {
+                title: "(3) Generador de Vapor (Circuito Secundario)",
+                use: "Transferir el calor del agua del reactor hacia un circuito secundario de agua limpia para generar vapor.",
+                working: "El agua sobrecalentada a alta presión del circuito primario fluye por el interior de miles de tubos metálicos (serpentín) dentro del generador de vapor. El agua del circuito secundario, que rodea estos tubos, está a una presión mucho menor, por lo que absorbe el calor, hierve rápidamente y se transforma en vapor de agua a alta presión.",
+                fact: "Aquí se produce la separación física absoluta entre el agua radiactiva del reactor y el vapor limpio que moverá la turbina."
+            },
+            'steam-pipes': {
+                title: "(4) Tubería de Vapor Secundario",
+                use: "Conducir el vapor a alta presión con máxima energía cinética hacia la sala de turbinas.",
+                working: "El vapor de agua limpio, sobrecalentado y con gran presión acumulada en el generador de vapor, es guiado a alta velocidad a través de tuberías aisladas hasta incidir de lleno contra los álabes de la turbina.",
+                fact: "La presión del vapor determina la velocidad de rotación final de los generadores y, por tanto, la frecuencia de la red eléctrica."
+            },
+            'turbine': {
+                title: "(5) Turbina de Vapor",
+                use: "Transformar la energía térmica y de presión del vapor en energía cinética rotacional.",
+                working: "El vapor de agua a alta velocidad choca contra las aspas de una serie de rotores (turbina gigante). A medida que el vapor avanza y se expande, pierde energía térmica y presión, haciéndola girar a velocidades de hasta 3,000 revoluciones por minuto. La turbina está mecánicamente acoplada al rotor del generador eléctrico.",
+                fact: "Es el motor mecánico de la planta, equivalente al pistón de un motor tradicional pero de tamaño industrial."
+            },
+            'generator': {
+                title: "(6) Generador Eléctrico (Alternador)",
+                use: "Transformar la energía cinética mecánica en energía eléctrica utilizable.",
+                working: "A diferencia del reactor que genera calor, este componente genera la electricidad. Al girar arrastrado por la turbina, un potente electroimán rota dentro de bobinas de cobre fijas (estátor). Según la Ley de Inducción de Faraday, este movimiento magnético induce una corriente alterna de gran voltaje que se envía directamente a la red de alta tensión para abastecer ciudades enteras.",
+                fact: "Este dispositivo no es nuclear en absoluto; funciona de la misma manera que las turbinas de una central hidroeléctrica o eólica."
+            },
+            'condenser': {
+                title: "Condensador de Vapor",
+                use: "Enfriar el vapor de escape de la turbina para devolverlo al estado líquido y cerrar el circuito secundario.",
+                working: "Una vez que el vapor ha pasado por la turbina y ha perdido casi toda su presión, entra en el condensador. Allí, miles de tuberías frías que transportan agua de un circuito externo (terciario) absorben el calor del vapor latente, haciendo que condense de nuevo en agua líquida líquida lista para ser bombeada de vuelta al generador de vapor.",
+                fact: "Al condensar el agua, se genera un vacío parcial debajo de la turbina que ayuda a que el vapor fluya con mayor velocidad."
+            },
+            'cooling-tower': {
+                title: "Torre de Refrigeración (Enfriamiento)",
+                use: "Disipar el exceso de calor térmico sobrante directamente hacia la atmósfera de forma inocua.",
+                working: "El agua del circuito de enfriamiento terciario, que se calentó al condensar el vapor en el condensador, se envía a la torre de refrigeración. Allí se pulveriza desde las alturas. Al caer, entra en contacto con una corriente de aire ascendente, lo que enfría la mayor parte del agua por evaporación. El calor sobrante se eleva hacia la atmósfera.",
+                fact: "Las grandes nubes blancas que emiten estas torres son simple vapor de agua pura evaporada, sin ningún componente radiactivo."
+            }
+        };
+
+        // --- VARIABLES DE ESTADO FÍSICO ---
+        let coolantActive = false;
+        let rodPosition = 0; // 0% (completamente insertado) a 100% (completamente extraído)
+        let isScrammed = false;
+        let gridConnected = false;
+        
+        let reactivity = 0;
+        let temperature = 20; // Temperatura ambiente inicial
+        let pressure = 1;     // Presión atmosférica inicial
+        let megawatts = 0;
+        let turbineRotationSpeed = 0;
+
+        // --- MANIPULACIÓN SEGURA DEL DOM (Failsafe DOM Guards) ---
+        function safeSetText(id, text) {
+            const el = document.getElementById(id);
+            if (el) el.innerText = text;
+        }
+
+        function safeSetClass(id, className) {
+            const el = document.getElementById(id);
+            if (el) el.className = className;
+        }
+
+        function safeSetHTML(id, html) {
+            const el = document.getElementById(id);
+            if (el) el.innerHTML = html;
+        }
+
+        // --- PASO 1: ACTIVAR/DESACTIVAR REFRIGERACIÓN ---
+        function toggleCoolant() {
+            if (isScrammed) return;
+            coolantActive = !coolantActive;
+            
+            const btn = document.getElementById('btn-step-1');
+            const icon = document.getElementById('icon-step-1');
+            const check = document.getElementById('check-step-1');
+            const card = document.getElementById('step-1-card');
+            const slider = document.getElementById('slider-rods');
+            const step2Card = document.getElementById('step-2-card');
+            
+            if (coolantActive) {
+                if (btn) btn.className = "mt-0.5 p-1 bg-emerald-600 text-white rounded transition-all";
+                if (icon) icon.setAttribute('data-lucide', 'power');
+                if (check) check.classList.remove('hidden');
+                if (card) card.classList.add('border-emerald-500/40');
+                
+                // Habilitar Paso 2 (Barras de control)
+                if (step2Card) step2Card.classList.remove('opacity-50');
+                if (slider) slider.disabled = false;
+            } else {
+                if (btn) btn.className = "mt-0.5 p-1 bg-slate-800 text-slate-400 hover:text-white rounded transition-all";
+                if (check) check.classList.add('hidden');
+                if (card) card.classList.remove('border-emerald-500/40');
+                
+                // Si apaga refrigeración y las barras están afuera, el reactor se sobrecalienta
+                if (step2Card) step2Card.classList.add('opacity-50');
+                if (slider) slider.disabled = true;
+            }
+            lucide.createIcons();
+            updateCoreState();
+        }
+
+        // --- ACTUALIZAR EL ESTADO FÍSICO DESDE EL SLIDER ---
+        function updateCoreState() {
+            if (isScrammed) return;
+
+            const slider = document.getElementById('slider-rods');
+            if (!slider) return;
+            rodPosition = parseInt(slider.value);
+            
+            // Actualizar la etiqueta visual del slider
+            safeSetText('val-rods', rodPosition === 0 ? "0%" : `${rodPosition}%`);
+
+            // Mover las barras de contención en el SVG
+            const rodsGroup = document.getElementById('control-rods-svg');
+            if (rodsGroup) {
+                const translationY = - (rodPosition * 0.9); // Rango de movimiento de 0 a -90px
+                rodsGroup.setAttribute('transform', `translate(0, ${translationY})`);
+            }
+
+            // Reactividad del núcleo en base a boro/cadmio extraído
+            reactivity = rodPosition;
+
+            // Ajustar el brillo Cherenkov del núcleo (azul cian) proporcional a la fisión
+            const glow = document.getElementById('core-glow-light');
+            if (glow) {
+                if (reactivity > 0) {
+                    glow.classList.remove('opacity-0');
+                    glow.setAttribute('fill-opacity', (reactivity / 100) * 0.85);
+                } else {
+                    glow.classList.add('opacity-0');
+                }
+            }
+
+            // Checklist Paso 2 completado si las barras se retiran lo suficiente (>10%)
+            const check2 = document.getElementById('check-step-2');
+            const card2 = document.getElementById('step-2-card');
+            if (rodPosition >= 15) {
+                if (check2) check2.classList.remove('hidden');
+                if (card2) card2.classList.add('border-emerald-500/40');
+            } else {
+                if (check2) check2.classList.add('hidden');
+                if (card2) card2.classList.remove('border-emerald-500/40');
+            }
+        }
+
+        // --- FISICA GENERAL DEL SISTEMA (Bucle de 100ms) ---
+        function updatePhysicsLoop() {
+            if (isScrammed) return;
+
+            // 1. CÁLCULO DE TEMPERATURA Y PRESIÓN
+            // Si hay reactividad (fisión), la temperatura sube. 
+            // Si la refrigeración está activa, tiende a estabilizarse o disipar calor.
+            const targetTemperature = 20 + (reactivity * 4.2); // Máximo 440°C
+            
+            if (temperature < targetTemperature) {
+                temperature += 2; // Sube temperatura
+            } else if (temperature > targetTemperature) {
+                temperature -= 1.5; // Baja temperatura lentamente si se vuelven a insertar las barras
+            }
+
+            // Simulación de presión ligada a la temperatura del circuito primario (Presurizador)
+            if (temperature > 100) {
+                pressure = Math.round((temperature - 100) * 0.5 + 1);
+            } else {
+                pressure = 1;
+            }
+
+            // Actualizar indicadores digitales de forma segura
+            safeSetText('ind-reactivity', `${reactivity}%`);
+            safeSetText('ind-temp', `${Math.round(temperature)} °C`);
+            safeSetText('ind-pressure', `${Math.round(pressure)} bar`);
+
+            // Actualizar visualizador termodinámico de flujo de calor
+            safeSetText('flow-thermal', `${Math.round(temperature)} °C (Térmica)`);
+
+            // 2. CHECKLIST PASO 3: Lograr Temperatura de Criticidad Óptima (280°C - 380°C)
+            const check3 = document.getElementById('check-step-3');
+            const card3 = document.getElementById('step-3-card');
+            const step4Card = document.getElementById('step-4-card');
+            const btnStep4 = document.getElementById('btn-step-4');
+            const isTempOptimal = temperature >= 280 && temperature <= 390;
+
+            if (isTempOptimal) {
+                if (check3) check3.classList.remove('hidden');
+                if (card3) {
+                    card3.classList.add('border-emerald-500/40');
+                    card3.classList.remove('opacity-50');
+                }
+                
+                // Habilitar Paso 4 (Conexión a la red)
+                if (step4Card) step4Card.classList.remove('opacity-50');
+                if (btnStep4) {
+                    btnStep4.disabled = false;
+                    btnStep4.classList.remove('cursor-not-allowed');
+                }
+            } else {
+                if (check3) check3.classList.add('hidden');
+                if (card3) card3.classList.remove('border-emerald-500/40');
+                if (temperature < 280) {
+                    if (card3) card3.classList.add('opacity-50');
+                    if (step4Card) step4Card.classList.add('opacity-50');
+                    if (btnStep4) {
+                        btnStep4.disabled = true;
+                        btnStep4.classList.add('cursor-not-allowed');
+                    }
+                }
+            }
+
+            // 3. VELOCIDAD DE LA TURBINA EN BASE AL VAPOR GENERADO
+            // Se genera vapor si la temperatura supera los 150 °C en el intercambiador secundario
+            if (temperature > 150 && coolantActive) {
+                const steamPressure = (temperature - 150) / 290; // Proporcional al calor sobrante
+                turbineRotationSpeed = steamPressure * 15; // Velocidad de rotación visual de la turbina
+                safeSetText('flow-kinetic', `Vapor a ${Math.round(steamPressure * 100)}%`);
+            } else {
+                turbineRotationSpeed = 0;
+                safeSetText('flow-kinetic', `Sin vapor`);
+                // Si la turbina se para, forzar desconexión de red eléctrica
+                if (gridConnected) {
+                    toggleGridSync();
+                }
+            }
+
+            // 4. GENERACIÓN DE ELECTRICIDAD (MW)
+            // Solo se produce energía si la turbina gira AND el alternador está sincronizado (Paso 4)
+            if (gridConnected && turbineRotationSpeed > 2) {
+                megawatts = Math.round(turbineRotationSpeed * 53); // Hasta 800 MW estables
+                safeSetText('txt-megawatts', `${megawatts} MW`);
+                safeSetClass('txt-megawatts', "text-amber-400 font-bold animate-pulse text-[11px]");
+                safeSetText('flow-electric', `${megawatts} MW en Red`);
+            } else {
+                megawatts = 0;
+                safeSetText('txt-megawatts', "0 MW");
+                safeSetClass('txt-megawatts', "text-slate-500 font-bold text-[11px]");
+                safeSetText('flow-electric', `Desconectado`);
+            }
+
+            // 5. ESTADOS Y ALERTAS DE LA PLANTA
+            const statusIndicator = document.getElementById('status-indicator-ping');
+            const statusText = document.getElementById('txt-status');
+            
+            if (statusText && statusIndicator) {
+                if (reactivity === 0) {
+                    statusText.innerText = "APAGADA";
+                    statusText.className = "text-slate-400 font-bold text-[11px]";
+                    statusIndicator.className = "w-2 h-2 rounded-full bg-slate-500";
+                } else if (reactivity > 85) {
+                    statusText.innerText = "PELIGRO (ALTA)";
+                    statusText.className = "text-red-500 font-bold animate-pulse text-[11px]";
+                    statusIndicator.className = "w-2 h-2 rounded-full bg-red-500 animate-ping";
+                } else if (megawatts > 0) {
+                    statusText.innerText = "CONECTADA";
+                    statusText.className = "text-emerald-400 font-bold text-[11px]";
+                    statusIndicator.className = "w-2 h-2 rounded-full bg-emerald-500 animate-ping";
+                } else {
+                    statusText.innerText = "CRÍTICA (STANDBY)";
+                    statusText.className = "text-amber-500 font-bold text-[11px]";
+                    statusIndicator.className = "w-2 h-2 rounded-full bg-amber-500";
+                }
+            }
+
+            // Actualizar flujos visuales en el SVG
+            updateVisualFlows();
+            
+            // Simulación en tiempo real de la microdinámica de fisión
+            updateFissionMicroPanel();
+        }
+
+        // --- PASO 4: CONECTAR ALTERNADOR A LA RED ---
+        function toggleGridSync() {
+            if (isScrammed || turbineRotationSpeed === 0) return;
+            gridConnected = !gridConnected;
+            
+            const btn = document.getElementById('btn-step-4');
+            const check = document.getElementById('check-step-4');
+            const card = document.getElementById('step-4-card');
+            
+            if (gridConnected) {
+                if (btn) btn.className = "mt-0.5 p-1 bg-yellow-600 text-white rounded transition-all";
+                if (check) check.classList.remove('hidden');
+                if (card) card.classList.add('border-emerald-500/40');
+            } else {
+                if (btn) btn.className = "mt-0.5 p-1 bg-slate-800 text-slate-400 hover:text-white rounded transition-all";
+                if (check) check.classList.add('hidden');
+                if (card) card.classList.remove('border-emerald-500/40');
+            }
+            lucide.createIcons();
+        }
+
+        // --- ANIMACIÓN DE ROTACIÓN DE LA TURBINA EN EL SVG ---
+        let currentRotation = 0;
+        function animateTurbine() {
+            if (turbineRotationSpeed > 0) {
+                currentRotation += turbineRotationSpeed;
+                if (currentRotation >= 360) currentRotation = 0;
+                
+                const blades = document.querySelectorAll('.turbine-blade');
+                blades.forEach(b => {
+                    b.setAttribute('transform', `rotate(${currentRotation}, 530, 200)`);
+                });
+            }
+            requestAnimationFrame(animateTurbine);
+        }
+
+        // --- CONTROL DE OPACIDADES DE FLUJOS EN SVG ---
+        function updateVisualFlows() {
+            const flowPrimHot = document.getElementById('flow-prim-hot');
+            const flowPrimCold = document.getElementById('flow-prim-cold');
+            const flowSecHot = document.getElementById('flow-sec-hot');
+            const flowGrid = document.getElementById('flow-grid');
+            const flowCoolingSteam = document.getElementById('flow-cooling-steam');
+            const flowCoolingSteam2 = document.getElementById('flow-cooling-steam-2');
+
+            if (coolantActive && reactivity > 0) {
+                if (flowPrimHot) {
+                    flowPrimHot.className = "animated-flow-primary";
+                    flowPrimHot.style.opacity = "1";
+                }
+                if (flowPrimCold) {
+                    flowPrimCold.className = "animated-flow-primary";
+                    flowPrimCold.style.opacity = "1";
+                }
+            } else {
+                if (flowPrimHot) flowPrimHot.style.opacity = "0";
+                if (flowPrimCold) flowPrimCold.style.opacity = "0";
+            }
+
+            if (turbineRotationSpeed > 0) {
+                if (flowSecHot) {
+                    flowSecHot.className = "animated-flow-secondary";
+                    flowSecHot.style.opacity = "1";
+                }
+                if (flowCoolingSteam) {
+                    flowCoolingSteam.className = "animated-flow-cooling";
+                    flowCoolingSteam.style.opacity = "1";
+                }
+                if (flowCoolingSteam2) {
+                    flowCoolingSteam2.className = "animated-flow-cooling";
+                    flowCoolingSteam2.style.opacity = "1";
+                }
+            } else {
+                if (flowSecHot) flowSecHot.style.opacity = "0";
+                if (flowCoolingSteam) flowCoolingSteam.style.opacity = "0";
+                if (flowCoolingSteam2) flowCoolingSteam2.style.opacity = "0";
+            }
+
+            if (gridConnected && megawatts > 0) {
+                if (flowGrid) {
+                    flowGrid.className = "animated-flow-secondary";
+                    flowGrid.style.opacity = "1";
+                }
+            } else {
+                if (flowGrid) flowGrid.style.opacity = "0";
+            }
+        }
+
+        // --- MICRO PANEL DE VISUALIZACIÓN DE FISIÓN ---
+        function updateFissionMicroPanel() {
+            const txt = document.getElementById('txt-fission-count');
+
+            if (reactivity === 0) {
+                safeSetText('txt-fission-count', "Estable");
+                safeSetClass('txt-fission-count', "text-slate-500 font-bold");
+                safeSetHTML('fission-micro-panel', `<span class="text-[10px] text-slate-600 font-mono-tech">[Esperando Criticidad]</span>`);
+            } else if (reactivity > 85) {
+                safeSetText('txt-fission-count', "Inestable");
+                safeSetClass('txt-fission-count', "text-red-500 font-bold animate-pulse");
+                safeSetHTML('fission-micro-panel', `
+                    <div class="absolute w-8 h-8 bg-yellow-400 rounded-full blur-md animate-ping"></div>
+                    <div class="text-red-500 font-bold text-[9px] font-mono-tech animate-bounce">➔💥 CRISIS DE REACCIÓN 💥➔</div>
+                `);
+            } else {
+                safeSetText('txt-fission-count', "Fisión Activa");
+                safeSetClass('txt-fission-count', "text-yellow-400 font-bold");
+                safeSetHTML('fission-micro-panel', `
+                    <div class="flex gap-2 items-center text-[10px]">
+                        <span class="w-2.5 h-2.5 bg-cyan-400 rounded-full animate-ping">n⁰</span>
+                        <span class="text-rose-500 font-bold">➔</span>
+                        <span class="w-3.5 h-3.5 bg-amber-500 rounded-full text-[6px] flex items-center justify-center font-bold text-black font-mono-tech">U235</span>
+                        <span class="text-rose-500 font-bold">➔</span>
+                        <span class="text-[8px] text-orange-400 font-bold">CALOR</span>
+                    </div>
+                `);
+            }
+        }
+
+        // --- DETECTAR MOUSE ENCIMA (HOVER INTERACTIVO) ---
+        function focusComponent(id) {
+            const data = componentDb[id];
+            if (!data) return;
+
+            safeSetText('hover-current-node', `Foco actual: ${data.title}`);
+            safeSetText('details-title', data.title);
+            safeSetHTML('details-body', `
+                <p><strong class="text-rose-400">¿Para qué sirve?:</strong> ${data.use}</p>
+                <p><strong class="text-slate-100">¿Cómo funciona?:</strong> ${data.working}</p>
+                <p class="text-slate-400 border-t border-slate-800/60 pt-1 italic"><strong class="text-amber-400 not-italic">Dato clave:</strong> ${data.fact}</p>
+            `);
+        }
+
+        function blurComponent() {
+            safeSetText('hover-current-node', "Foco actual: Ninguno");
+        }
+
+        // --- PARADA DE EMERGENCIA ACTIVA (SCRAM) ---
+        function triggerScram() {
+            isScrammed = true;
+            coolantActive = false;
+            gridConnected = false;
+            
+            // Deshabilitar controles de la consola
+            const slider = document.getElementById('slider-rods');
+            if (slider) {
+                slider.value = 0;
+                slider.disabled = true;
+            }
+
+            const btnStep1 = document.getElementById('btn-step-1');
+            if (btnStep1) {
+                btnStep1.disabled = true;
+                btnStep1.className = "mt-0.5 p-1 bg-red-800 text-slate-400 rounded cursor-not-allowed";
+            }
+            
+            const btnStep4 = document.getElementById('btn-step-4');
+            if (btnStep4) {
+                btnStep4.disabled = true;
+                btnStep4.className = "mt-0.5 p-1 bg-red-800 text-slate-400 rounded cursor-not-allowed";
+            }
+
+            // Detener barras de control en el SVG
+            const rodsGroup = document.getElementById('control-rods-svg');
+            if (rodsGroup) rodsGroup.setAttribute('transform', 'translate(0, 0)');
+
+            // Brillo del núcleo apagado instantáneamente
+            const glow = document.getElementById('core-glow-light');
+            if (glow) glow.setAttribute('fill-opacity', 0);
+
+            // Detener flujos visuales
+            stopAllFlowAnimations();
+
+            // Apagar checklist de pasos de forma segura
+            const checkIds = ['check-step-1', 'check-step-2', 'check-step-3', 'check-step-4'];
+            checkIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('hidden');
+            });
+            
+            const cardIds = ['step-1-card', 'step-2-card', 'step-3-card', 'step-4-card'];
+            cardIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.remove('border-emerald-500/40');
+            });
+
+            const cardsToDim = ['step-2-card', 'step-3-card', 'step-4-card'];
+            cardsToDim.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('opacity-50');
+            });
+
+            reactivity = 0;
+            megawatts = 0;
+            turbineRotationSpeed = 0;
+            
+            safeSetText('ind-reactivity', "0% (SCRAM)");
+            safeSetClass('ind-reactivity', "text-red-500 font-extrabold animate-pulse text-xs");
+            safeSetText('txt-megawatts', "0 MW");
+            safeSetText('txt-status', "SITUACIÓN DE SCRAM ACTIVA");
+            safeSetClass('txt-status', "text-red-500 font-extrabold animate-pulse text-[11px]");
+            
+            const statusIndicator = document.getElementById('status-indicator-ping');
+            if (statusIndicator) statusIndicator.className = "w-2.5 h-2.5 rounded-full bg-red-600 animate-ping";
+
+            safeSetText('txt-fission-count', "SCRAM");
+            safeSetClass('txt-fission-count', "text-red-500 font-bold");
+            safeSetHTML('fission-micro-panel', `<span class="text-[10px] text-red-500 font-mono-tech font-bold">[SCRAM TRIGGERED]</span>`);
+
+            // Enfriamiento rápido simulado del agua primaria
+            let coolDownInterval = setInterval(() => {
+                if (temperature > 20) {
+                    temperature -= 15;
+                    pressure -= 10;
+                    if (temperature < 20) temperature = 20;
+                    if (pressure < 1) pressure = 1;
+                    safeSetText('ind-temp', `${Math.round(temperature)} °C`);
+                    safeSetText('ind-pressure', `${Math.round(pressure)} bar`);
+                    safeSetText('flow-thermal', `${Math.round(temperature)} °C (Térmica)`);
+                } else {
+                    clearInterval(coolDownInterval);
+                }
+            }, 300);
+
+            // Actualizar detalles para explicar el mecanismo SCRAM
+            safeSetHTML('details-title', `<span class="text-red-500 font-mono-tech">⚠ SCRAM ACTIVO</span>`);
+            safeSetHTML('details-body', `
+                <p>Las <strong>barras de contención de boro/cadmio</strong> se han dejado caer por gravedad hasta el fondo del núcleo de forma instantánea. Al absorber el 100% de los neutrones libres, la reacción se detiene.</p>
+            `);
+        }
+
+        // --- APAGAR FLUJOS DEL CIRCUITO ---
+        function stopAllFlowAnimations() {
+            const ids = ['flow-prim-hot', 'flow-prim-cold', 'flow-sec-hot', 'flow-grid', 'flow-cooling-steam', 'flow-cooling-steam-2'];
+            ids.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.opacity = "0";
+            });
+        }
+    </script>
+</body>
+</html>
